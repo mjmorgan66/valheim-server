@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  valheim:
+    image: my-valheim:latest
+    user: root
+    container_name: valheim
+    environment:
+      - SERVER_NAME=My Valheim Server
+      - WORLD_NAME=MyWorld
+      - SERVER_PASS=supersecret
+      - PUBLIC=1
+      - PORT=2456
+      - BE_PINEX_URL=https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
+    ports:
+      - "2456:2456/udp"
+      - "2457:2457/udp"
+      - "2458:2458/udp"
+    volumes:
+      - valheim_data:/data
+    restart: unless-stopped
+
+volumes:
+  valheim_data:
