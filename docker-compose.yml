@@ -9,8 +9,8 @@ services:
       - SERVER_NAME=My Valheim Server
       - WORLD_NAME=MyWorld
       - SERVER_PASS=supersecret
-      - PUBLIC=1
-      - PORT=2456
+      - SERVER_PUBLIC=0
+      - SERVER_PORT=2456
       - BE_PINEX_URL=https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
     ports:
       - "2456:2456/udp"

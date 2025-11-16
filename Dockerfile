@@ -19,7 +19,8 @@ RUN chmod +x /home/steam/entrypoint.sh \
         curl \
         vim \
         unzip \
-        jq
+        jq \
+        rsync
 
 EXPOSE 2456/udp 2457/udp 2458/udp
 
