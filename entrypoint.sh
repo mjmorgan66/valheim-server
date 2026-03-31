@@ -73,9 +73,8 @@ if [ -n "${INSTALL_PLUGINS}" ]; then
   echo "**** Symlink configs for plugins ****"
   echo "*************************************"
   echo ""
-  #echo "DEBUG: ls CONFIG_FILE_DIR"
-  #ls $CONFIG_FILE_DIR
-  # add a symlink for all configs found
+
+  # add a COPY for all configs found to plugin config folder
   for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $APP_DIR/BepInEx/config/$i; done
 
   export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so"
