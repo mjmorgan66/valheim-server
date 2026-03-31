@@ -1,10 +1,10 @@
 #!/bin/bash
 
-podman build . -t registry.home/steamapps/valheim-server:0.1
-podman push --tls-verify=false registry.home/steamapps/valheim-server:0.1
+docker build . -t registry.home/steamapps/valheim-server:1.6.9
+docker push registry.home/steamapps/valheim-server:1.6.9
 
-kubectl rollout restart deployment -n games valheim-dedicated-server
+#kubectl rollout restart statefulset -n games valheim-dedicated-server
 
-sleep 10
+#sleep 20
 
-kubectl logs -n games -l app.kubernetes.io/instance=valheim-dedicated-server --follow
+#kubectl logs -n games -l app.kubernetes.io/instance=valheim-dedicated-server --follow

@@ -2,27 +2,22 @@
 set -euo pipefail
 
 APP_DIR="$1"
-MODS_DIR="$APP_DIR/BepInEx/plugins"
+BEPINEX_DIR="$APP_DIR/BepInEx"
+MODS_DIR="$BEPINEX_DIR/plugins"
 LIST_FILE="/home/steam/plugin-list"
+
+# ===============================================================
+# Debugging
+# ===============================================================
+
+echo "APP_DIR=$APP_DIR"
+echo "BEPINEX_DIR=$BEPINEX_DIR"
+echo "MODS_DIR=$MODS_DIR"
+echo "LIST_FILE=$LIST_FILE"
 
 # ===============================================================
 # Helpers
 # ===============================================================
-
-version_compare() {
-  # returns 0 if $1 == $2, 1 if $1 > $2, 2 if $1 < $2
-  if [[ "$1" == "$2" ]]; then return 0; fi
-  local IFS=.
-  local i ver1=($1) ver2=($2)
-  # fill empty fields with zeros
-  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do ver1[i]=0; done
-  for ((i=${#ver2[@]}; i<${#ver1[@]}; i++)); do ver2[i]=0; done
-  for ((i=0; i<${#ver1[@]}; i++)); do
-    if ((10#${ver1[i]} > 10#${ver2[i]})); then return 1; fi
-    if ((10#${ver1[i]} < 10#${ver2[i]})); then return 2; fi
-  done
-  return 0
-}
 
 get_plugin_info() {
   local plugin="$1"
@@ -33,14 +28,49 @@ get_plugin_info() {
 download_and_extract() {
   local url="$1"
   local target_dir="$2"
-  local filename
+  local filename tmp_extract_dir
+
   filename="$(basename "$url")"
+  tmp_extract_dir="$(mktemp -d)"
 
   mkdir -p "$target_dir"
+
   echo "⬇️  Downloading $filename..."
   curl -sfSL -o "/tmp/$filename" "$url"
-  echo "📦 Extracting $filename to $target_dir..."
-  unzip -o -q "/tmp/$filename" -d "$target_dir"
+
+  echo "📦 Extracting $filename..."
+  unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
+
+  echo "📂 Collecting .dll files..."
+  find "$tmp_extract_dir" -type f -iname "*.dll" -exec mv -f {} "$target_dir/" \;
+
+  # Cleanup
+  rm -rf "$tmp_extract_dir"
+  rm -f "/tmp/$filename"
+}
+
+download_and_extract_bepinex() {
+  local url="$1"
+  local target_dir="$2"
+  local filename tmp_extract_dir
+
+  filename="$(basename "$url")"
+  tmp_extract_dir="$(mktemp -d)"
+
+  mkdir -p "$target_dir"
+
+  echo "⬇️  Downloading $filename..."
+  curl -sfSL -o "/tmp/$filename" "$url"
+
+  echo "📦 Extracting $filename..."
+  unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
+
+  echo "📂 Installing BepInEx contents..."
+  # Move everything from the inner folder into target_dir
+  rsync -a "$tmp_extract_dir"/BepInExPack_Valheim/ "$target_dir"/
+
+  # Cleanup
+  rm -rf "$tmp_extract_dir"
   rm -f "/tmp/$filename"
 }
 
@@ -67,26 +97,13 @@ install_plugin() {
 
   local install_marker="${mods_dir}/${author}-${plugin_name}.version"
 
-  # Check existing version
-  if [[ -f "$install_marker" ]]; then
-    local existing_version
-    existing_version=$(<"$install_marker")
-    version_compare "$version" "$existing_version"
-    cmp_result=$?
-    if [[ $cmp_result -eq 2 ]]; then
-      echo "🟡 Installed version ($existing_version) is newer — skipping ${plugin_name}"
-      return
-    elif [[ $cmp_result -eq 0 ]]; then
-      echo "✔️  ${plugin_name} v${version} already installed."
-      return
-    else
-      echo "⬆️  Updating ${plugin_name} from ${existing_version} → ${version}"
-    fi
-  fi
-
   # Download and install plugin
   if [[ -n "$json_download_url" ]]; then
-    download_and_extract "$json_download_url" "$mods_dir"
+    if [[ "$plugin_name" == *BepInEx* ]]; then
+      download_and_extract_bepinex "$json_download_url" "$mods_dir"
+    else
+      download_and_extract "$json_download_url" "$mods_dir"
+    fi
     echo "$version" > "$install_marker"
     echo "✅ Installed ${plugin_name} v${version}"
   else
@@ -105,6 +122,12 @@ install_plugin() {
     dep_ver=$(echo "$dep" | cut -d'-' -f3)
     dep_id="${dep_author}/${dep_name}"
 
+    # Skip BepInEx dependencies, it should already be installed
+    if [[ "$dep_name" == *BepInEx* ]]; then
+      echo "⏭️ Skipping dependency: $dep_id"
+      continue
+    fi
+
     echo "🔗 Checking dependency: $dep_id (requires >= $dep_ver)"
     install_plugin "$dep_id" "$mods_dir"
   done
@@ -114,21 +137,22 @@ install_plugin() {
 # Step 1: BepInEx installation
 # ===============================================================
 install_bepinex() {
-  local url="https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/"
-  echo "🔧 Installing BepInEx..."
-  download_and_extract "$url" "/tmp"
+  #local url="https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/"
+  echo "🔧 Installing BepInEx...a better way..."
 
-  rsync -a /tmp/BepInExPack_Valheim/ $APP_DIR/
+  plugin=denikson/BepInExPack_Valheim 
 
-  rm -rf /tmp/BepInExPack_Valheim
+  # a better way, APP_DIR should be root valheim dir.
+  install_plugin "$plugin" "$APP_DIR"
+
+
+#  download_and_extract "$url" "/tmp"
+
+#  rsync -a /tmp/BepInExPack_Valheim/ $APP_DIR/
+
+#  rm -rf /tmp/BepInExPack_Valheim
+
   chmod +x $APP_DIR/*.sh
-
-#  export LD_PRELOAD="/opt/valheim/doorstop_libs/libdoorstop_x64.so"
-#  export DOORSTOP_ENABLED=1
-#  export DOORSTOP_TARGET_ASSEMBLY=./BepInEx/core/BepInEx.Preloader.dll
-#  export LD_LIBRARY_PATH="./doorstop_libs:$LD_LIBRARY_PATH"
-#  export LD_PRELOAD="libdoorstop_x64.so:$LD_PRELOAD"
-#  export LD_LIBRARY_PATH="./linux64:$LD_LIBRARY_PATH"
 
   echo "✅ BepInEx installed in: $APP_DIR"
 }
@@ -137,6 +161,14 @@ install_bepinex() {
 # Step 2: Process plugin list
 # ===============================================================
 download_plugins() {
+  # first, clean the plugin dir.  Always download latest.
+  if [[ -d "$MODS_DIR" ]]; then
+    echo "Cleaning plugin directory (deleting plugins)."
+    rm -rf $MODS_DIR/*
+  else
+    echo "$MODS_DIR not found, skipping cleaning..."
+  fi
+
   if [[ ! -f "$LIST_FILE" ]]; then
     echo "⚠️ Plugin list not found: $LIST_FILE (skipping)"
     return

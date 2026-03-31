@@ -17,6 +17,7 @@ set -euo pipefail
 : "${ADMINLIST_IDS:=}"
 : "${STEAMCMD_DIR:=$HOME}"
 : "${APP_DIR:=/opt/valheim}"
+: "${CONFIG_FILE_DIR:=${APP_DIR}/config2}" # source folder to load config files to bepinex
 : "${STEAM_APP_ID:=896660}" 
 : "${SERVER_NAME:=My-Server}"
 : "${WORLD_NAME:=Dedicated}"
@@ -66,6 +67,16 @@ if [ -n "${INSTALL_PLUGINS}" ]; then
   echo "**** DONE with plugins ****"
   echo "***************************"
   echo ""
+
+  echo ""
+  echo "*************************************"
+  echo "**** Symlink configs for plugins ****"
+  echo "*************************************"
+  echo ""
+  #echo "DEBUG: ls CONFIG_FILE_DIR"
+  #ls $CONFIG_FILE_DIR
+  # add a symlink for all configs found
+  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $APP_DIR/BepInEx/config/$i; done
 
   export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so"
   export DOORSTOP_ENABLED=1
