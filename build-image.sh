@@ -1,7 +1,9 @@
 #!/bin/bash
 
-docker build . -t registry.home/steamapps/valheim-server:1.6.9
-docker push registry.home/steamapps/valheim-server:1.6.9
+VERSION=1.6.12
+
+docker build . -t registry.home/steamapps/valheim-server:$VERSION
+docker push registry.home/steamapps/valheim-server:$VERSION
 
 #kubectl rollout restart statefulset -n games valheim-dedicated-server
 

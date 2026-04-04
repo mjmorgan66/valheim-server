@@ -35,13 +35,13 @@ download_and_extract() {
 
   mkdir -p "$target_dir"
 
-  echo "⬇️  Downloading $filename..."
+  echo "*  Downloading $filename..."
   curl -sfSL -o "/tmp/$filename" "$url"
 
-  echo "📦 Extracting $filename..."
+  echo "* Extracting $filename..."
   unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
 
-  echo "📂 Collecting .dll files..."
+  echo "* Collecting .dll files..."
   find "$tmp_extract_dir" -type f -iname "*.dll" -exec mv -f {} "$target_dir/" \;
 
   # Cleanup
@@ -59,13 +59,13 @@ download_and_extract_bepinex() {
 
   mkdir -p "$target_dir"
 
-  echo "⬇️  Downloading $filename..."
+  echo "*  Downloading $filename..."
   curl -sfSL -o "/tmp/$filename" "$url"
 
-  echo "📦 Extracting $filename..."
+  echo "* Extracting $filename..."
   unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
 
-  echo "📂 Installing BepInEx contents..."
+  echo "* Installing BepInEx contents..."
   # Move everything from the inner folder into target_dir
   rsync -a "$tmp_extract_dir"/BepInExPack_Valheim/ "$target_dir"/
 
@@ -82,14 +82,15 @@ install_plugin() {
   local mods_dir="$2"
   local json json_download_url version author plugin_name filename
 
-  echo "🔍 Checking plugin: $plugin"
+  echo "* Checking plugin: $plugin"
 
   json="$(get_plugin_info "$plugin")" || {
-    echo "❌ Failed to fetch info for $plugin"
+    echo "* Failed to fetch info for $plugin"
     return
   }
-
-  json_download_url="$(echo "$json" | jq -r '.latest.download_url // empty')"
+  
+  json_download_url="$(echo "$json" | jq -r '.download_url // (.latest?.download_url) // empty')"
+  # adding new way, delete this later: json_download_url="$(echo "$json" | jq -r '.latest.download_url // empty')"
   version="$(echo "$json" | jq -r '.latest.version_number // "unknown"')"
   author="$(echo "$plugin" | cut -d'/' -f1)"
   plugin_name="$(echo "$plugin" | cut -d'/' -f2)"
@@ -104,16 +105,20 @@ install_plugin() {
     else
       download_and_extract "$json_download_url" "$mods_dir"
     fi
-    echo "$version" > "$install_marker"
-    echo "✅ Installed ${plugin_name} v${version}"
+    echo "* $version" > "$install_marker"
+    echo "* Installed ${plugin_name} v${version}"
   else
-    echo "⚠️  No download URL for ${plugin_name}"
+    echo "* No download URL for ${plugin_name}"
     return
   fi
 
   # Handle dependencies recursively
   local dependencies
-  dependencies=$(echo "$json" | jq -r '.latest.dependencies[]?' || true)
+  dependencies="$(echo "$json" | jq -r '(.dependencies // .latest.dependencies // [])[]?' || true)"
+  # deprecated: dependencies=$(echo "$json" | jq -r '.latest.dependencies[]?' || true)
+
+  echo "** Dependencies found: $dependencies"
+
   for dep in $dependencies; do
     # Format is "author-name-version"
     local dep_author dep_name dep_ver dep_id
@@ -124,11 +129,12 @@ install_plugin() {
 
     # Skip BepInEx dependencies, it should already be installed
     if [[ "$dep_name" == *BepInEx* ]]; then
-      echo "⏭️ Skipping dependency: $dep_id"
+      echo "** Skipping dependency: $dep_id"
       continue
     fi
 
-    echo "🔗 Checking dependency: $dep_id (requires >= $dep_ver)"
+    # SETUP LOGIC HERE, if dep already installed then skip.  Having dep issues when i specify a version. Instead of installing latest version of dep, i want to only install what i have.
+    echo "** Checking dependency: $dep_id (requires >= $dep_ver)"
     install_plugin "$dep_id" "$mods_dir"
   done
 }
@@ -138,7 +144,7 @@ install_plugin() {
 # ===============================================================
 install_bepinex() {
   #local url="https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/"
-  echo "🔧 Installing BepInEx...a better way..."
+  echo "* Installing BepInEx...a better way..."
 
   plugin=denikson/BepInExPack_Valheim 
 
@@ -154,7 +160,7 @@ install_bepinex() {
 
   chmod +x $APP_DIR/*.sh
 
-  echo "✅ BepInEx installed in: $APP_DIR"
+  echo "* BepInEx installed in: $APP_DIR"
 }
 
 # ===============================================================
@@ -163,14 +169,14 @@ install_bepinex() {
 download_plugins() {
   # first, clean the plugin dir.  Always download latest.
   if [[ -d "$MODS_DIR" ]]; then
-    echo "Cleaning plugin directory (deleting plugins)."
+    echo "*** Cleaning plugin directory (deleting plugins). ***"
     rm -rf $MODS_DIR/*
   else
-    echo "$MODS_DIR not found, skipping cleaning..."
+    echo "*** $MODS_DIR not found, skipping cleaning... ***"
   fi
 
   if [[ ! -f "$LIST_FILE" ]]; then
-    echo "⚠️ Plugin list not found: $LIST_FILE (skipping)"
+    echo "*** Plugin list not found: $LIST_FILE (skipping) ***"
     return
   fi
 
@@ -178,17 +184,17 @@ download_plugins() {
   valid_lines=$(grep -v '^\s*#' "$LIST_FILE" | grep -v '^\s*$' || true)
 
   if [[ -z "$valid_lines" ]]; then
-    echo "⚠️ Plugin list is empty or all comments (skipping)"
+    echo "*** Plugin list is empty or all comments (skipping) ***"
     return
   fi
 
-  echo "📦 Processing plugins from: $LIST_FILE"
+  echo "*** Processing plugins from: $LIST_FILE ***"
   echo "$valid_lines" | while read -r plugin; do
     [[ -z "$plugin" ]] && continue
     install_plugin "$plugin" "$MODS_DIR"
   done
 
-  echo "✅ Plugin processing complete."
+  echo "*** Plugin processing complete. ***"
 }
 
 # ===============================================================

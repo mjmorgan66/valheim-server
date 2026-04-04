@@ -57,35 +57,69 @@ fi
 
 if [ -n "${INSTALL_PLUGINS}" ]; then
   echo ""
-  echo "***************************"
-  echo "*** Checking plugins... ***"
-  echo "***************************"
-  echo ""
+  echo "******************************"
+  echo "*** Downloading plugins... ***"
+  echo "******************************"
+  echo "*"
   /home/steam/download-plugins.sh $APP_DIR || true
-  echo ""
-  echo "***************************"
-  echo "**** DONE with plugins ****"
-  echo "***************************"
+  echo "*"
+  echo "* Done!"
+  echo "*"
+  echo "******************************"
   echo ""
 
   echo ""
   echo "*************************************"
-  echo "**** Symlink configs for plugins ****"
+  echo "***** Copy configs for plugins ******"
   echo "*************************************"
-  echo ""
+  echo "*"
+  echo "* Copy dir: $CONFIG_FILE_DIR, cp Location: $APP_DIR/BepInEx/config"
+  echo "*"
 
   # add a COPY for all configs found to plugin config folder
-  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $APP_DIR/BepInEx/config/$i; done
+  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "* Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $APP_DIR/BepInEx/config/$i; done
+  echo "* Done!"
+  echo "*"
+  echo "*************************************"
 
+  echo "*********************************"
+  echo "*** Checking for AntiCheat... ***"
+  echo "*********************************"
+  echo "*"
+  
+  if [ -d "$APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist" ]; then
+  echo "* Found Whitelist dir"
+  echo "* Emtpying existing white list..."
+  rm -rf $APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist/*
+  echo "* Done!"
+
+  echo "* Adding plugins to the whitelist..."
+  for file in "$APP_DIR/BepInEx/plugins"/*.dll; do
+    [ -e "$file" ] || continue  # skip if no .dll files found
+    echo "* Copying file $file to $APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist"
+    cp -f "$file" "$APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist/"
+  done
+  echo "* Done!"
+  echo "*"
+  echo "*********************************"
+
+fi # if install plugins
+
+  echo "************************************************"
+  echo "***** Setting up BepInEx env variables... ******"
+  echo "************************************************"
+  echo "*"
   export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so"
   export DOORSTOP_ENABLED=1
   export DOORSTOP_TARGET_ASSEMBLY=$APP_DIR/BepInEx/core/BepInEx.Preloader.dll
   export LD_LIBRARY_PATH="$APP_DIR/doorstop_libs:$LD_LIBRARY_PATH"
 #  export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so:$LD_PRELOAD"
 
+  echo "* Done!"
+  echo "*"
+  echo "************************************************"
 fi
 
-# Expose helpful info
 echo "****"
 echo "Server name: ${SERVER_NAME}"
 echo "World: ${WORLD_NAME}"
