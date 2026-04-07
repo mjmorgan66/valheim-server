@@ -17,6 +17,9 @@ set -euo pipefail
 : "${ADMINLIST_IDS:=}"
 : "${STEAMCMD_DIR:=$HOME}"
 : "${APP_DIR:=/opt/valheim}"
+: "${BEPINEX_ROOT_DIR:=$APP_DIR/BepInEx}"
+: "${BEPINEX_PLUGIN_CONFIG_DIR:=$BEPINEX_ROOT_DIR/config}"
+: "${BEPINEX_PLUGIN_DIR:=$BEPINEX_ROOT_DIR/plugins}"
 : "${CONFIG_FILE_DIR:=${APP_DIR}/config2}" # source folder to load config files to bepinex
 : "${STEAM_APP_ID:=896660}" 
 : "${SERVER_NAME:=My-Server}"
@@ -55,6 +58,9 @@ if [ -d /data/backups ]; then
   ln -sfn /data/backups "${BACKUP_DIR}" || true
 fi
 
+###########
+# PLUGINS #
+###########
 if [ -n "${INSTALL_PLUGINS}" ]; then
   echo ""
   echo "******************************"
@@ -63,7 +69,7 @@ if [ -n "${INSTALL_PLUGINS}" ]; then
   echo "*"
   /home/steam/download-plugins.sh $APP_DIR || true
   echo "*"
-  echo "* Done!"
+  echo "* Done downloading plugins!"
   echo "*"
   echo "******************************"
   echo ""
@@ -73,52 +79,53 @@ if [ -n "${INSTALL_PLUGINS}" ]; then
   echo "***** Copy configs for plugins ******"
   echo "*************************************"
   echo "*"
-  echo "* Copy dir: $CONFIG_FILE_DIR, cp Location: $APP_DIR/BepInEx/config"
+  echo "* Copy dir: $CONFIG_FILE_DIR, cp Location: $BEPINEX_PLUGIN_CONFIG_DIR"
   echo "*"
-
-  # add a COPY for all configs found to plugin config folder
-  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "* Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $APP_DIR/BepInEx/config/$i; done
-  echo "* Done!"
+  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "* Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $BEPINEX_PLUGIN_CONFIG_DIR/$i; done
+  echo "* Done copying configs!"
   echo "*"
   echo "*************************************"
+  echo ""
 
+  echo ""
   echo "*********************************"
   echo "*** Checking for AntiCheat... ***"
   echo "*********************************"
   echo "*"
-  
-  if [ -d "$APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist" ]; then
-  echo "* Found Whitelist dir"
-  echo "* Emtpying existing white list..."
-  rm -rf $APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist/*
-  echo "* Done!"
-
-  echo "* Adding plugins to the whitelist..."
-  for file in "$APP_DIR/BepInEx/plugins"/*.dll; do
-    [ -e "$file" ] || continue  # skip if no .dll files found
-    echo "* Copying file $file to $APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist"
-    cp -f "$file" "$APP_DIR/BepInEx/config/AzuAntiCheat_Whitelist/"
-  done
-  echo "* Done!"
+  if [ -d "$BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist" ]; then
+    echo "* Found Whitelist dir"
+    echo "* Emtpying existing white list..."
+    rm -rf $BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist/*
+    echo "* Done!"
+    echo "* Adding plugins to the whitelist..."
+    for file in "$BEPINEX_PLUGIN_DIR"/*.dll; do
+      [ -e "$file" ] || continue  # skip if no .dll files found
+      echo "* Copying file $file to $BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist"
+      cp -f "$file" "$BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist/"
+    done
+    echo "* Done!"
+    echo "*"
+  fi
+  echo "*"
+  echo "* Done checking AntiCheat"
   echo "*"
   echo "*********************************"
-
-fi # if install plugins
-
+  echo ""
+ 
+  echo ""
   echo "************************************************"
   echo "***** Setting up BepInEx env variables... ******"
   echo "************************************************"
   echo "*"
   export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so"
   export DOORSTOP_ENABLED=1
-  export DOORSTOP_TARGET_ASSEMBLY=$APP_DIR/BepInEx/core/BepInEx.Preloader.dll
+  export DOORSTOP_TARGET_ASSEMBLY=$BEPINEX_ROOT_DIR/core/BepInEx.Preloader.dll
   export LD_LIBRARY_PATH="$APP_DIR/doorstop_libs:$LD_LIBRARY_PATH"
-#  export LD_PRELOAD="$APP_DIR/doorstop_libs/libdoorstop_x64.so:$LD_PRELOAD"
-
-  echo "* Done!"
+  echo "* Done setting up variables!"
   echo "*"
   echo "************************************************"
-fi
+  echo ""
+fi # install plugins
 
 echo "****"
 echo "Server name: ${SERVER_NAME}"
