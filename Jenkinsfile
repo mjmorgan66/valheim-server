@@ -25,7 +25,9 @@ podTemplate(
         timeout(time:10, unit: 'MINUTES') {
             node(LABEL) {
                 checkout scm
+                println("calling entrypoint...")
                 entrypoint
+                println("done calling entrypoing")
             }
         }
 }
