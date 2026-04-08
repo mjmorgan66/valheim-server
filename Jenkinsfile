@@ -28,6 +28,7 @@ podTemplate(
                 println("calling entrypoint...")
                 entrypoint()
                 println("done calling entrypoing")
+                println("testing update!")
             }
         }
 }
