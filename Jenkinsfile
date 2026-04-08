@@ -1,26 +1,31 @@
+#!groovy
 
 @Library('jenkins-library') _
 
-pipeline {
-    agent any
+def LABEL= "label_goes_here"
 
-    stages {
-        stage('Checkout') {
-            steps {
+def container = [
+    containerTemplate(
+      name: 'busybox',
+      image: 'busybox',
+      ttyEnabled: true,
+      command: 'cat'
+    )
+  ]
+podTemplate(
+    label: LABEL,
+    containers: container,
+    //volumes: volumes,
+    serviceAccount: 'jenkins',
+    yaml: '''
+    spec:
+      securityContext:
+        fsGroup: 1000
+    ''') {
+        timeout(time:10, unit: 'MINUTES') {
+            node(LABEL) {
                 checkout scm
+                entrypoint
             }
         }
-
-        stage('Build') {
-            steps {
-                sh 'echo Building project...'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'echo Running tests...'
-            }
-        }
-    }
 }
