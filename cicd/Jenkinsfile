@@ -37,7 +37,6 @@ podTemplate(
 
                 checkout scm
                 entrypoint()
-              }
             }
         }
 }
