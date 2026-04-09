@@ -24,11 +24,20 @@ podTemplate(
     ''') {
         timeout(time:10, unit: 'MINUTES') {
             node(LABEL) {
+              
+                sh 'env'
+//                checkout([
+//                  $class: 'GitSCM',
+//                  branches: [[name: '*/main']],
+//                  userRemoteConfigs: [[
+//                    url: 
+//                    credentialsId: ''
+//                  ]]
+//                ])
+
                 checkout scm
-                println("calling entrypoint...")
                 entrypoint()
-                println("done calling entrypoing")
-                println("testing update!")
+              }
             }
         }
 }
