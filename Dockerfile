@@ -10,7 +10,6 @@ RUN mkdir -p ${VALHEIM_DIR}
 COPY entrypoint.sh /home/steam/entrypoint.sh 
 COPY download-plugins.sh /home/steam/download-plugins.sh
 COPY plugin-list /home/steam/plugin-list
-COPY load-config-symlinks.sh /home/steam/load-config-symlinks.sh
 
 RUN chmod +x /home/steam/entrypoint.sh \
     && chmod +x /home/steam/download-plugins.sh \
