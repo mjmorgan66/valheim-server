@@ -2,9 +2,9 @@
 
 @Library('jenkins-library') _
 
-String projectName = "valheim-server"
+def projectName = "valheim-server"
 
-String LABEL = containerTemplates.nodeLabel(projectName)
+def LABEL = containerTemplates.nodeLabel(projectName)
 
 def buildImages = ['docker']
 
