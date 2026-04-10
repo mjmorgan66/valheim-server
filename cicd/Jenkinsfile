@@ -2,12 +2,13 @@
 
 @Library('jenkins-library') _
 
+String projectName = "valheim-server"
 
-def LABEL= "valheim-server"
+String LABEL = containerTemplates.nodeLabel(projectName)
 
-def buildContainers = ['docker']
+def buildImages = ['docker']
 
-def containers =  containerTemplates.build(buildContainers)
+def containers =  containerTemplates.build(this, buildImages)
 
 podTemplate(
     label: LABEL,
