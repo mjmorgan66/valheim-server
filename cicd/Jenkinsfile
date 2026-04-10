@@ -2,19 +2,16 @@
 
 @Library('jenkins-library') _
 
-def LABEL= "label_goes_here"
 
-def container = [
-    containerTemplate(
-      name: 'busybox',
-      image: 'busybox',
-      ttyEnabled: true,
-      command: 'cat'
-    )
-  ]
+def LABEL= "valheim-server"
+
+def buildContainers = ['docker']
+
+def containers =  containerTemplates.build(buildContainers)
+
 podTemplate(
     label: LABEL,
-    containers: container,
+    containers: containers,
     //volumes: volumes,
     serviceAccount: 'jenkins',
     yaml: '''
@@ -25,16 +22,6 @@ podTemplate(
         timeout(time:10, unit: 'MINUTES') {
             node(LABEL) {
               
-                sh 'env'
-//                checkout([
-//                  $class: 'GitSCM',
-//                  branches: [[name: '*/main']],
-//                  userRemoteConfigs: [[
-//                    url: 
-//                    credentialsId: ''
-//                  ]]
-//                ])
-
                 checkout scm
                 entrypoint()
             }
