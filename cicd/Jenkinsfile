@@ -9,11 +9,12 @@ def LABEL = containerTemplates.nodeLabel(this, projectName)
 def buildImages = ['docker']
 
 def containers =  containerTemplates.build(this, buildImages)
+def volumes = containerTemplates.defaultVolumes(this, buildImages)
 
 podTemplate(
     label: LABEL,
     containers: containers,
-    //volumes: volumes,
+    volumes: volumes,
     serviceAccount: 'jenkins',
     yaml: '''
     spec:
