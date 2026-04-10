@@ -1,10 +1,3 @@
 build:
   tool: "docker"
-  test:
-    foo: bar
-    foo2: 
-      another: level
-  back: 
-    foo3: bar3
-backToRoot:
-  lastTest: testtest
+  projectName: "valheim-server"
