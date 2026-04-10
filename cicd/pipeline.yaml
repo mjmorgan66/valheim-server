@@ -2,7 +2,7 @@ build:
   tool: "docker"
   test:
     foo: bar
-    foo2: bar2
+    foo2: 
       another: level
   back: 
     foo3: bar3
