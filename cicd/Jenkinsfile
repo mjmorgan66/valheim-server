@@ -4,7 +4,7 @@
 
 def projectName = "valheim-server"
 
-def LABEL = containerTemplates.nodeLabel(projectName)
+def LABEL = containerTemplates.nodeLabel(this, projectName)
 
 def buildImages = ['docker']
 
