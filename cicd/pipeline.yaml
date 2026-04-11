@@ -1,3 +1,5 @@
 build:
   tool: "docker"
   projectName: "valheim-server"
+docker:
+  project: "games"
