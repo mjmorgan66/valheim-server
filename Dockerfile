@@ -1,5 +1,5 @@
-# Use an Ubuntu base with minimal extra baggage
-FROM docker.io/steamcmd/steamcmd:ubuntu-24
+FROM harbor.home/docker/steamcmd/steamcmd:ubuntu-24
+# Replacing with proxy FROM docker.io/steamcmd/steamcmd:ubuntu-24
 
 ENV VALHEIM_DIR=/opt/valheim \
     VALHEIM_PORT=2456 \
