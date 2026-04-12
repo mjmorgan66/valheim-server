@@ -1,5 +1,5 @@
 build:
-  tool: "docker"
+  pipeline: "docker"
   projectName: "valheim-server"
 docker:
   project: "games"
