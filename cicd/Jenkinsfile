@@ -19,6 +19,7 @@ podTemplate(
     label: LABEL,
     containers: containers,
     volumes: volumes,
+    imagePullSecrets: ['harbor-auth-config']
     serviceAccount: 'jenkins',
     yaml: '''
     spec:
