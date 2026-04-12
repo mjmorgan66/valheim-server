@@ -2,6 +2,10 @@
 
 @Library('jenkins-library') _
 
+def envMap = [
+  FOO: "BAR!!"
+]
+
 def projectName = "valheim-server"
 
 def LABEL = containerTemplates.nodeLabel(this, projectName)
