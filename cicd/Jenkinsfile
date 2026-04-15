@@ -1,0 +1,38 @@
+#!groovy
+
+@Library('jenkins-library') _
+
+def envMap = [
+  FOO: "BAR!!"
+]
+
+def projectName = "valheim-server"
+
+def LABEL = containerTemplates.nodeLabel(this, projectName)
+
+def buildImages = ['buildkit']
+
+def containers =  containerTemplates.build(this, buildImages)
+def volumes = containerTemplates.defaultVolumes(this, buildImages)
+
+podTemplate(
+    label: LABEL,
+    containers: containers,
+    volumes: volumes,
+    imagePullSecrets: ['harbor-auth-pull-secret'],
+    serviceAccount: 'jenkins',
+    yaml: '''
+    spec:
+      securityContext:
+        fsGroup: 1000
+    ''') {
+        timeout(time:10, unit: 'MINUTES') {
+            node(LABEL) {
+              
+                sh "ls -al"
+                sh "ls -al /home/jenkins/.docker"
+                checkout scm
+                entrypoint()
+            }
+        }
+}

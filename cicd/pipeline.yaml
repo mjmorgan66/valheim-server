@@ -1,0 +1,5 @@
+build:
+  pipeline: "docker"
+  projectName: "valheim-server"
+docker:
+  project: "games"

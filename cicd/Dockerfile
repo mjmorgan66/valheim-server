@@ -1,5 +1,5 @@
-# Use an Ubuntu base with minimal extra baggage
-FROM docker.io/steamcmd/steamcmd:ubuntu-24
+FROM harbor.home/docker/steamcmd/steamcmd:ubuntu-24
+# Replacing with proxy FROM docker.io/steamcmd/steamcmd:ubuntu-24
 
 ENV VALHEIM_DIR=/opt/valheim \
     VALHEIM_PORT=2456 \
@@ -10,7 +10,6 @@ RUN mkdir -p ${VALHEIM_DIR}
 COPY entrypoint.sh /home/steam/entrypoint.sh 
 COPY download-plugins.sh /home/steam/download-plugins.sh
 COPY plugin-list /home/steam/plugin-list
-COPY load-config-symlinks.sh /home/steam/load-config-symlinks.sh
 
 RUN chmod +x /home/steam/entrypoint.sh \
     && chmod +x /home/steam/download-plugins.sh \
