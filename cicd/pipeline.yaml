@@ -3,3 +3,9 @@ build:
   projectName: "valheim-server"
 docker:
   project: "games"
+deployment:
+  enabled: true
+  pipeline: "argocd"
+  argocd:
+    valuesRepo: ""
+    valuesFile: ""
