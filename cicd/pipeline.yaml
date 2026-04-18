@@ -2,7 +2,7 @@ build:
   pipeline: "docker"
 docker:
   project: "games"
-  repo: "valheim-servertest"
+  repo: "valheim-server"
 deployment:
   chart:
     repo: chartstest
