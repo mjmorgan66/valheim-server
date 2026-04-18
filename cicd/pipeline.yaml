@@ -3,3 +3,8 @@ build:
 docker:
   project: "games"
   repo: "valheim-servertest"
+deployment:
+  chart:
+    repo: chartstest
+    values: values-valheim.yaml
+    path: charts/steamapps
