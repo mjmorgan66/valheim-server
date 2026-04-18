@@ -6,5 +6,5 @@ docker:
 deployment:
   chart:
     repo: charts
-    values: values-valheim.yaml
+    values: values-valheim-test.yaml
     path: steamapps
