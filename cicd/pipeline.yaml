@@ -1,5 +1,10 @@
 build:
   pipeline: "docker"
-  projectName: "valheim-server"
 docker:
   project: "games"
+  repo: "valheim-server"
+deployment:
+  chart:
+    repo: charts
+    values: values-valheim-test.yaml
+    path: steamapps
