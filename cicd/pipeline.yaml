@@ -1,11 +1,11 @@
 build:
   pipeline: "docker"
-  projectName: "valheim-server"
 docker:
   project: "games"
+  repo: "valheim-server"
 deployment:
   enabled: true
-  pipeline: "argocd"
-  argocd:
-    valuesRepo: ""
-    valuesFile: ""
+  chart:
+    repo: charts
+    values: values-valheim.yaml
+    path: steamapps
