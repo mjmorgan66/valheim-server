@@ -6,11 +6,6 @@ set -euo pipefail
 # adminlist.txt found here:
 # /root/.config/unity3d/IronGate/Valheim
 #
-  echo "******"
-  echo "******"
-  echo "******"
-  echo "******"
-
   export LD_LIBRARY_PATH=/opt/valheim/linux64
 
 # env defaults (can be overridden)
@@ -61,7 +56,14 @@ fi
 ###########
 # PLUGINS #
 ###########
-if [ -n "${INSTALL_PLUGINS}" ]; then
+install_plugins_enabled() {
+  case "$(printf '%s' "${INSTALL_PLUGINS}" | tr '[:upper:]' '[:lower:]')" in
+    1|true|yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+if install_plugins_enabled; then
   echo ""
   echo "******************************"
   echo "*** Downloading plugins... ***"
