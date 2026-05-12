@@ -1,11 +1,14 @@
 build:
   pipeline: "docker"
 docker:
+  registry: "harbor.home"
   project: "games"
   repo: "valheim-server"
+  dockerFile: "cicd/"
 deployment:
   enabled: true
   chart:
+    registry: "harbor.home"
     repo: charts
     values: values-valheim.yaml
     path: steamapps

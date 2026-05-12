@@ -61,7 +61,8 @@ fi
 ###########
 # PLUGINS #
 ###########
-if [ -n "${INSTALL_PLUGINS}" ]; then
+# Helm renders env values as strings, so only explicit true/1 enables plugin work.
+if [[ "${INSTALL_PLUGINS,,}" == "true" || "${INSTALL_PLUGINS}" == "1" ]]; then
   echo ""
   echo "******************************"
   echo "*** Downloading plugins... ***"

@@ -28,9 +28,6 @@ podTemplate(
     ''') {
         timeout(time:10, unit: 'MINUTES') {
             node(LABEL) {
-              
-                sh "ls -al"
-                sh "ls -al /home/jenkins/.docker"
                 checkout scm
                 entrypoint()
             }
