@@ -1,0 +1,3 @@
+# Shrink build context and avoid unnecessary COPY invalidation for unrelated edits.
+.git
+.github
