@@ -31,6 +31,7 @@ set -euo pipefail
 : "${INSTALL_PLUGINS:=false}"   # optional: URL to a BepInEx zip
 : "${WORLD_SAVE_DIR:=${APP_DIR}/worlds}"
 : "${BACKUP_DIR:=${APP_DIR}/backups}"
+: "${SERVER_MODIFIERS:=''}"
 
 # Ensure directories exist and are writable
 mkdir -p /data /data/worlds /data/config /data/backups
@@ -162,7 +163,8 @@ exec "${SERVER_BIN}" \
   -public "${SERVER_PUBLIC}" \
   -savedir "${WORLD_SAVE_DIR}" \
   -saveinterval 1800 \
-  -backups 4 
+  -backups 4 \
+  ${SERVER_MODIFIERS}
 #  -preset "hard"
 #      Setting a preset will override all modifiers (if any are set)
 #      Normal, Casual, Easy, Hard, Hardcore, Immersive, Hammer
