@@ -31,7 +31,7 @@ set -euo pipefail
 : "${INSTALL_PLUGINS:=false}"   # optional: URL to a BepInEx zip
 : "${WORLD_SAVE_DIR:=${APP_DIR}/worlds}"
 : "${BACKUP_DIR:=${APP_DIR}/backups}"
-: "${SERVER_MODIFIERS:=''}"
+: "${SERVER_MODIFIERS:=}"
 
 # Ensure directories exist and are writable
 mkdir -p /data /data/worlds /data/config /data/backups
@@ -152,6 +152,21 @@ echo "*** Starting dedicated server ***"
 # It must use the full valheim app id, and not the server app id
 export SteamAppId=892970
 
+# Helm | quote is YAML syntax only. Curly/smart quotes in values become literal
+# characters in this env var and Valheim then ignores the modifier flag.
+modifiers="${SERVER_MODIFIERS:-}"
+modifiers="${modifiers//\"/}"
+modifiers="${modifiers//\'/}"
+modifiers="${modifiers//“/}"
+modifiers="${modifiers//”/}"
+
+# Split into real argv: -modifier portals casual → three flags, not one blob.
+modifier_args=()
+if [[ -n "${modifiers}" ]]; then
+  # read returns 1 at EOF; ignore that so set -e does not abort startup.
+  read -r -a modifier_args <<< "${modifiers}" || true
+fi
+
 # starts dedicated server
 exec "${SERVER_BIN}" \
   -nographics \
@@ -164,7 +179,7 @@ exec "${SERVER_BIN}" \
   -savedir "${WORLD_SAVE_DIR}" \
   -saveinterval 1800 \
   -backups 4 \
-  ${SERVER_MODIFIERS}
+  "${modifier_args[@]}"
 #  -preset "hard"
 #      Setting a preset will override all modifiers (if any are set)
 #      Normal, Casual, Easy, Hard, Hardcore, Immersive, Hammer
