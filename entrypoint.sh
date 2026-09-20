@@ -76,44 +76,12 @@ if [[ "${INSTALL_PLUGINS,,}" == "true" || "${INSTALL_PLUGINS}" == "1" ]]; then
   echo "******************************"
   echo ""
 
-  echo ""
-  echo "*************************************"
-  echo "***** Copy configs for plugins ******"
-  echo "*************************************"
-  echo "*"
-  echo "* Copy dir: $CONFIG_FILE_DIR, cp Location: $BEPINEX_PLUGIN_CONFIG_DIR"
-  echo "*"
-  for i in $(ls $CONFIG_FILE_DIR 2>/dev/null); do echo "* Copying config file for $i"; cp -rf $CONFIG_FILE_DIR/$i  $BEPINEX_PLUGIN_CONFIG_DIR/$i; done
-  echo "* Done copying configs!"
-  echo "*"
-  echo "*************************************"
-  echo ""
+  # Deprecated: chart-mounted cfg overrides ($CONFIG_FILE_DIR → BepInEx/config)
+  # and the AzuAntiCheat whitelist copy. That assumed the addon and
+  # BepInEx/config already existed; a missing dest crashed via set -e.
+  # AzuAntiCheat is gone. Skip manual overrides until this is rewritten.
+  # Plugins keep the configs they ship.
 
-  echo ""
-  echo "*********************************"
-  echo "*** Checking for AntiCheat... ***"
-  echo "*********************************"
-  echo "*"
-  if [ -d "$BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist" ]; then
-    echo "* Found Whitelist dir"
-    echo "* Emtpying existing white list..."
-    rm -rf $BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist/*
-    echo "* Done!"
-    echo "* Adding plugins to the whitelist..."
-    for file in "$BEPINEX_PLUGIN_DIR"/*.dll; do
-      [ -e "$file" ] || continue  # skip if no .dll files found
-      echo "* Copying file $file to $BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist"
-      cp -f "$file" "$BEPINEX_PLUGIN_CONFIG_DIR/AzuAntiCheat_Whitelist/"
-    done
-    echo "* Done!"
-    echo "*"
-  fi
-  echo "*"
-  echo "* Done checking AntiCheat"
-  echo "*"
-  echo "*********************************"
-  echo ""
- 
   echo ""
   echo "************************************************"
   echo "***** Setting up BepInEx env variables... ******"
