@@ -21,7 +21,9 @@ echo "LIST_FILE=$LIST_FILE"
 
 get_plugin_info() {
   local plugin="$1"
-  local json_url="https://thunderstore.io/api/experimental/package/${plugin}"
+  # Thunderstore 502s this endpoint without the trailing slash.
+  # Plugin ids stay Author/Name; strip a list slash so we never get //.
+  local json_url="https://thunderstore.io/api/experimental/package/${plugin%/}/"
   curl -sfSL -H "accept: application/json" "$json_url"
 }
 
