@@ -27,6 +27,31 @@ get_plugin_info() {
   curl -sfSL -H "accept: application/json" "$json_url"
 }
 
+# Thunderstore zips built on Windows store paths with backslashes
+# (plugins\Jotunn.dll). Info-ZIP converts those to real directories and
+# still extracts the files, but it exits 1 for the warning. set -e would
+# abort here and leave the dependency DLL out of BepInEx/plugins.
+extract_zip() {
+  local archive="$1"
+  local dest="$2"
+  local status=0
+
+  unzip -o -q "$archive" -d "$dest" || status=$?
+
+  if [[ "$status" -eq 0 ]]; then
+    return 0
+  fi
+
+  # Exit 1 is warnings only; the archive contents are on disk.
+  if [[ "$status" -eq 1 ]]; then
+    echo "*  unzip reported warnings only (exit 1); continuing"
+    return 0
+  fi
+
+  echo "*  unzip failed with exit ${status}: ${archive}" >&2
+  return "$status"
+}
+
 download_and_extract() {
   local url="$1"
   local target_dir="$2"
@@ -41,7 +66,7 @@ download_and_extract() {
   curl -sfSL -o "/tmp/$filename" "$url"
 
   echo "* Extracting $filename..."
-  unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
+  extract_zip "/tmp/$filename" "$tmp_extract_dir"
 
   echo "* Collecting .dll files..."
   find "$tmp_extract_dir" -type f -iname "*.dll" -exec mv -f {} "$target_dir/" \;
@@ -65,7 +90,7 @@ download_and_extract_bepinex() {
   curl -sfSL -o "/tmp/$filename" "$url"
 
   echo "* Extracting $filename..."
-  unzip -o -q "/tmp/$filename" -d "$tmp_extract_dir"
+  extract_zip "/tmp/$filename" "$tmp_extract_dir"
 
   echo "* Installing BepInEx contents..."
   # Move everything from the inner folder into target_dir
